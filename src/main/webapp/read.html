@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <!-- Bootstrap CSS -->
+<!--
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+-->
+    <link  rel="stylesheet" href="dist/bootstrap/css/bootstrap.min.css">
+    <link  rel="stylesheet" href="css/documentary.css">
+
+    <script type="text/javascript" src="dist/web3/web3.min.js"></script>
+    <script type="text/javascript" src='dist/web3/bignumber.min.js'></script>
+
+    <script type="text/javascript" src="js/ethbasics2.js"></script>
+    <script type="text/javascript" src="js/docmain.js"></script>
+    <script type="text/javascript" src="js/docread.js"></script>
+    <script type="text/javascript" src="js/docoutput.js"></script>
+
+    <title>documentary. The repository of provable public knowledge</title>
+
+  </head>
+  <body>
+
+    <header>
+
+      <!-- Navigation bar-->        
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+
+        <!-- Logo -->        
+        <a class="navbar-brand" href="index.html" style="color: #00cc00">documentary.</a>
+
+        <!-- Main menu -->        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="write.html">Write</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Read <span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Display of user account -->        
+        <span id="val_account" class="navbar-text mr-3">You are not logged in</span>
+
+      </nav>
+    </header>
+
+    <main role="main">
+ 
+
+  <div class="container">
+    <h1>--</h1>
+    <div class="row">
+      <div class="col-md-2 mt-5">
+      </div>
+      <div class="col-md-8 mt-5">
+
+<!--   -->        
+
+        <!-- Search section -->        
+        <h3>Search for author or tag</h3>
+        <span id="val_contract"></span>
+
+        <br>
+        <br>
+
+        <!-- Search form -->        
+        <form class="form-group row" action="javascript:searchButtonPressed()">
+            <div class="col-sm-12">
+                <input type="text" class="form-control" id="searchauthor" placeholder="Enter author account number"></input><br>
+            </div>    
+            <div class="col-sm-12">
+                <input type="text" class="form-control" id="searchtags" placeholder="Enter tag"></input><br>
+            </div>    
+            <div class="col-sm-12">
+                <input type="submit" id="button_search" class="btn btn-success" value="Search">
+            </div>    
+        </form>
+
+        <br>
+        <hr class="hr-markup">
+
+        <!-- Search result list -->        
+        <div id="searchresultlist">
+            <div class="broadcast" id="-1">
+                <div class="bccontent"></div>
+            </div>
+        </div>        
+      </div>
+
+
+      <div class="container marketing">
+        <hr class="featurette-divider">
+      </div>
+
+
+      <!-- FOOTER -->
+      <footer class="container">
+        <p class="float-right"><a href="#">Back to top</a></p>
+        <p><a href="https://github.com/philippphb/documentary" target="_blank">github</a> &middot; </p>
+      </footer>
+    </main>
+
+
+    <!-- modal for info and error messages -->        
+    <div class="modal fade" id="modal_error" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="modal_error_title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body">
+            <span id="modal_error_message"></span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- modal for displaying documents -->        
+    <div class="modal fade" id="modal_documentdisplay" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="modal_documentdisplay_header"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body"">
+          <div id="modal_documentdisplay_document">
+            <div class="broadcast" id="-1">
+                <div class="bccontent"></div>
+            </div>
+          </div>
+          <textarea class="form-control" rows="5" id="comment_text" placeholder="Write a comment"></textarea>
+          <button type="button" class="btn btn-success" data-dismiss="modal" onClick="sendCommentButtonPressed()">Publish Comment</button>
+          <small>By clicking the publish button you agree to the terms and conditions and the code of conduct</small>
+          <br><br>
+          <div class="modal-body" id="modal_documentdisplay_comments">
+            <div class="broadcast" id="-1">
+                <div class="bccontent"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="dist/bootstrap/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="dist/bootstrap/js/vendor/popper.min.js"></script>
+    <script src="dist/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+<!--        
+    <script src="../dist/js/vendor/holder.min.js"></script>
+-->
+  </body>
+</html>

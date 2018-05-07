@@ -1,0 +1,29 @@
+
+div.headline {
+/*	font-size: x-large;
+	line-height: 1.5; */
+	font-size: 200%;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+	font-weight: bold;
+}
+
+div.author {
+	font-size: small;
+}
+
+div.tags {
+	font-size: small;
+	width: 100%;
+}
+
+div.bctext {
+	font-size: large;
+	width: 100%;
+	padding-top: 1em;
+}
+
+.hr-markup {
+	background-color: #00cc00;
+	height: 2px;
+}
