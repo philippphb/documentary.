@@ -7,27 +7,38 @@ var myaddress;
 // Selected Ethereum network
 var networkid;
 
+// If true, the an etehreum provider is available
+var connected;
+
+// If true, user is logged in at the ethereum provider
+var loggedin;
+
 
 // Establish connection to ethereum
 function initEth() {
 
+    connected = false;
+    loggedin = false;
+
+	// Initially unknown to be able react to initial settings	
+	myaddress = undefined;
+	networkid = undefined
+
 	// Using the injected web3 provider
 	if (typeof web3 !== 'undefined') {
 		web3 = new Web3(web3.currentProvider);
-		connectToBlockchain();
+	    connected = true;
 		setupInjectedProviderListener();
+
 	} else {
-		console.log("No provider found");
-		$('#modal_noprovider').modal('show');
+		console.log("No Ethereum Provider found");
+		showNoEthereumProviderError();
+	    connected = false;
 	}
 };
 
 // Setup timer that checks for changes of user account and network
 function setupInjectedProviderListener() {
-
-	// Initially unknown to be able react to initial settings	
-	myaddress = undefined;
-	networkid = undefined
 	
 	// Start timer
 	accountTimer = setInterval(function() {
@@ -39,10 +50,20 @@ function setupInjectedProviderListener() {
 			myaddress = web3.eth.accounts[0];
 			  
 			if (myaddress !== undefined) {
-				login();
+		 		
+		 		loggedin = true;
+
+				// Login only if a valid network was identified				
+				if (networkid !== undefined) {
+					login();
+				}
+			}			
+			else {
+		 		loggedin = false;
 			}
 		}
 		
+
 		// Handle network changes done through the injected provider
 		web3.version.getNetwork(function(error, result) {
 			if (!error) {
@@ -50,23 +71,36 @@ function setupInjectedProviderListener() {
 					
 					networkid = result;
 					
-					if (networkid == 1) contractAddress = contractAddress_mainnet;
-					else if (networkid == 4) contractAddress = contractAddress_rinkeby;	
+					if (networkid === "1") contractAddress = contractAddress_mainnet;
+					else if (networkid === "4") contractAddress = contractAddress_rinkeby;	
 					
-					if (networkid !== undefined) {
+					if (networkid !== undefined) {						
 						stopWatchers();
-					    connectToBlockchain();
+					    connectToBlockchain();				 		
 						login();
-					}
+					}					
 				}
 			}
 		});
+		
 	}, 300);
 }
 
 // Stops checking for changes of user account and network
 function stopInjectedProviderListener() {
 	if (accountTimer !== undefined) clearInterval(accountTimer);
+}
+
+function getNetworkId() {
+	return networkid;
+}
+
+function isConnected() {
+	return connected;
+}
+
+function userLoggedIn() {
+	return loggedin;
 }
 
 // Returns the name of the network as string
@@ -162,11 +196,29 @@ function cleanupAndFormat(str) {
 		if (curchar === ">") {			
 			if (tagstr.startsWith("<a ") || tagstr === "</a>"
 					|| tagstr === "<b>" || tagstr === "</b>"
+					|| tagstr === "<i>" || tagstr === "</i>"
 					|| tagstr === "<p>" || tagstr === "</p>"
+					|| tagstr === "<q>" || tagstr === "</q>"
 					|| tagstr.startsWith("<h") || tagstr.startsWith("</h")
+					|| tagstr === "<strong>" || tagstr === "</strong>"
+					|| tagstr === "<small>" || tagstr === "</small>"
+					|| tagstr === "<em>" || tagstr === "</em>"
+					|| tagstr === "<mark>" || tagstr === "</mark>"
+					|| tagstr === "<del>" || tagstr === "</del>"
+					|| tagstr === "<ins>" || tagstr === "</ins>"
+					|| tagstr === "<sub>" || tagstr === "</sub>"
+					|| tagstr === "<sup>" || tagstr === "</sup>"
+					|| tagstr === "<code>" || tagstr === "</code>"
 					|| tagstr === "<ul>" || tagstr === "</ul>"
 					|| tagstr === "<ol>" || tagstr === "</ol>"
 					|| tagstr === "<li>" || tagstr === "</li>"
+/*					
+					|| tagstr === "<table>" || tagstr === "</table>"
+					|| tagstr === "<tr>" || tagstr === "</tr>"
+					|| tagstr === "<th>" || tagstr === "</th>"
+					|| tagstr === "<td>" || tagstr === "</td>"
+*/					
+					|| tagstr === "<hr>" 
 					|| tagstr.startsWith("<img ")) {
 
 				// Make sure that links are always opened in separate windows/tabs				

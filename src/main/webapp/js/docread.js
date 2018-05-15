@@ -23,9 +23,23 @@ var docidarray = Array(docidarraysize);
 var wrcnt = 0;
 var rdcnt = 0;
 
+//
+var displaydocid;
+
 
 // Initalize the page, externally called from docmain.js
 function initPage() {
+
+    displaydocid = 0;
+
+    // Handle links that point to a document
+    var queryitems = window.location.search.substr(1).split("&");
+    if (queryitems[0].startsWith("docid=")) {
+        var docid = parseInt(queryitems[0].substring(6));
+        if (docid !== undefined && docid !== NaN) {
+            displaydocid = docid;
+        }
+    }
 }
 
 // Login, initially or when the account or network was changed. Eexternally called from ethbasics2.js
@@ -33,19 +47,39 @@ function login() {
 
     stopWatchers();
 
-    // Display contract address
-    $("#val_contract").html("<small>from contract " + contractAddress + " @ " + getNetworkName() + "</small>");
+    // Clear serach result list
+    clearBroadcasts("#searchresultlist");
 
-    // Display account address according to login state
-    if (myaddress !== undefined) {
-        $("#val_account").html(myaddress.toString() + " @ " + getNetworkName());
+    if (isConnected() === false) {
+        showNoEthereumProviderError();
     }
+
+    else if (isNetworkValid() === false) { 
+        showNetworkNotSupportedError();
+    }
+
     else {
-         $("#val_account").html("You are not logged in");   
-    }
 
-    // Initially, search for all documents, such that the latest publications are displayed
-    search("", "");  
+        // Display contract address
+        $("#val_contract").html("<small>from contract " + contractAddress + " @ " + getNetworkName() + "</small>");        
+
+        // Display account address according to login state
+        if (userLoggedIn() == true) {
+            $("#val_account").html(myaddress.toString() + " @ " + getNetworkName());
+        }
+        else {
+             $("#val_account").html("You are not logged in");   
+        }
+
+        // Displaya document that is pointed to by the URL
+        if (displaydocid > 0) {
+            showDocument(displaydocid);    
+            displaydocid = 0;
+        }
+
+        // Initially, search for all documents, such that the latest publications are displayed
+        search("", "");  
+    }
 }
 
 // Lougout when site is left, or account or network was changed. Eexternally called from ethbasics2.js
@@ -90,8 +124,18 @@ function sendCommentButtonPressed() {
 // Search for a document of author authoraddr and tag tag
 function search(authoraddr, tag) {
 
-    // Connection to Ethereum established
-    if (typeof web3 !== 'undefined') {
+    // Connection to Ethereum not established
+    if (isConnected() === false) {
+        showNoEthereumProviderError();
+    }
+
+    // Unsupported network selected
+    else if (isNetworkValid() === false) {
+        showNetworkNotSupportedError();
+    }
+
+    // Everything ready
+    else {
 
         // Hash search tag
         var taghash = web3.sha3(tag.trim().toLowerCase());
@@ -201,11 +245,6 @@ function search(authoraddr, tag) {
             });        
         }
     }
-
-    // Connection to Ethereum not established
-    else {
-        showNoEthereumProviderError();
-    }
 };
 
 // Retrieve documents based on ids
@@ -215,7 +254,6 @@ function getDocs() {
     if (loadingDoc) return;
 
     // Leave if ring buffer is empty
-    //if (rdcnt >= wrcnt) return;
     if (rdcnt == wrcnt) return;
 
     // Indicate that a loading process is running    

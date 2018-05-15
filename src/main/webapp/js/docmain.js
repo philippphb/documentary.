@@ -5,7 +5,6 @@ var contractAbi = [{"constant":true,"inputs":[{"name":"user","type":"address"},{
 var contractAddress_rinkeby = "0xaDdBEC01921ff2B46992F2a40fc322F7B08a86F9";         // Rinkeby
 var contractAddress_mainnet = "0xaDdBEC01921ff2B46992F2a40fc322F7B08a86F9";         // Main net
 
-
 // Contract address, reference and instance according to selected network
 var contractAddress;
 var documentaryContract;
@@ -31,7 +30,7 @@ window.addEventListener('load', function() {
 });
     
 function init() {
-    
+
     // Blockchain initialization
     initEth();
 
@@ -45,29 +44,43 @@ function init() {
 // Creates instance of the contract and connects it to the contract address according to the selected network
 function connectToBlockchain() {
 
-    documentaryContract = web3.eth.contract(contractAbi);
+    if (contractAddress !== undefined) {
 
-    try {
-        documentaryInstance = documentaryContract.at(contractAddress);
+        documentaryContract = web3.eth.contract(contractAbi);
+
+        try {
+            documentaryInstance = documentaryContract.at(contractAddress);
+        }
+        catch(err) {
+            showError("Error connecting to Ethereum block chain.");
+        }
     }
-    catch(err) {
-        showError("Error connecting to Ethereum block chain.");
-    }
+}
+
+function isNetworkValid() {
+    var nid = getNetworkId();
+    if (nid === "1" || nid === "4") return true;
+    return false;
 }
 
 // Deleivers the error message when no ethereum provider is found
 function showNoEthereumProviderError() {
-    showModal("No Ethereum Provider Found", "No Ethereum Provider Found. Please install the <a target=\"_blank\" href=\"https://metamask.io/\">MetaMask</a> plugin.");
+    showModal("No Ethereum Provider", "No Ethereum Provider was Found. Please install the <a target=\"_blank\" href=\"https://metamask.io/\">MetaMask</a> plugin or load the <a target=\"_blank\" href=\"http://www.toshi.org/\">Toshi</a> browser on your mobile device.");
 }
 
 // Deleivers the error message when no user is logged in
 function showNoUserLoggedInError() {
-    showModal("You are not logged in", "You are not logged in. Please login to your wallet to be able to publish documents.");
+    showModal("Login required", "You are not logged in. Please login to your wallet to be able to publish documents.");
+}
+
+// Deleivers the error message when a not supported network is selected
+function showNetworkNotSupportedError() {
+    showModal("Network not supported", "documentary is available on Mainnet and Rinkeby. Please connect to Mainnet or Rinkeby.");
 }
 
 // General function for error display
 function showError(message) {
-    showModal("An error occurred", message)
+    showModal("An error occurred", message);
 }
 
 // General function for displaying info/error modal
@@ -140,8 +153,23 @@ function showDocument(id) {
 // Sends a document of the logged in user with refid, title, tags and text to the documentary contract
 function sendDocument(refid, title, tags, text) {
 
-    // Connection to Ethereum established and user logged in
-    if (typeof web3 !== 'undefined' && myaddress !== undefined) {
+    // Connection to Ethereum not established
+    if (isConnected() === false) {
+        showNoEthereumProviderError();
+    }
+
+    // Unsupported network selected
+    else if (isNetworkValid() === false) {
+        showNetworkNotSupportedError();
+    }
+
+    // No user logged in
+    else if (userLoggedIn() === false) {
+        showNoUserLoggedInError();
+    }
+
+    // Everything ready
+    else {
 
         // Extract the separate tags and create tag hashes 
         var tagarray = tags.split(new RegExp("[\\s\\,\\;]+"));
@@ -187,15 +215,5 @@ function sendDocument(refid, title, tags, text) {
                 showError(error);
             }
         });
-    }
-
-    // Connection to Ethereum not established
-    else if (typeof web3 === 'undefined') {
-        showNoEthereumProviderError();
-    }
-
-    // No user logged in
-    else {
-        showNoUserLoggedInError();
     }
 };
