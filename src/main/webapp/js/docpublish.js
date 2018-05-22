@@ -35,20 +35,31 @@ function login() {
             // Display account address and load documents authored by the logged in user
             $("#val_account").html(myaddress.toString() + " @ " + getNetworkName());
 
-            docsOfAuthorEvent = documentaryInstance.DocumentEvent({author: myaddress}, {fromBlock: startBlockNo, toBlock: 'latest'});
-            docsOfAuthorEvent.watch(function(error, result) {
-                if (!error) {
+            web3.eth.getBlockNumber(function(error, blocknr) {
+                
+                if (!error) {          
 
-                    // Display only original documents, no comments. Display using summaries and without comment links
-                    if (result.args.refid.toNumber() === 0) {
-                        printDocument(result, "#authordoclist", true, false);
-                        $('#alert_docsent').hide();
-                    }
+                    startBlockNo = blocknr - getNumLookBackBlocks();
+
+                    docsOfAuthorEvent = documentaryInstance.DocumentEvent({author: myaddress}, {fromBlock: startBlockNo, toBlock: 'latest'});
+                    docsOfAuthorEvent.watch(function(error, result) {
+                        if (!error) {
+
+                            // Display only original documents, no comments. Display using summaries and without comment links
+                            if (result.args.refid.toNumber() === 0) {
+                                printDocument(result, "#authordoclist", true, false);
+                                $('#alert_docsent').hide();
+                            }
+                        }
+                        else {
+                            showError(error);
+                        }
+                    });        
                 }
                 else {
                     showError(error);
-                }
-            });        
+                }                
+            });
         }
 
         // Handle login to page when no user is logged in in injected provider

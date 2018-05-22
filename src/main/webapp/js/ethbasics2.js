@@ -71,8 +71,14 @@ function setupInjectedProviderListener() {
 					
 					networkid = result;
 					
-					if (networkid === "1") contractAddress = contractAddress_mainnet;
-					else if (networkid === "4") contractAddress = contractAddress_rinkeby;	
+					if (networkid === "1") {
+						contractAddress = contractAddress_mainnet;
+						deployBlockNr = deployBlockNr_mainnet;
+					}
+					else if (networkid === "4") {
+						contractAddress = contractAddress_rinkeby;	
+						deployBlockNr = deployBlockNr_rinkeby;
+					}
 					
 					if (networkid !== undefined) {						
 						stopWatchers();

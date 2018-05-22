@@ -144,106 +144,115 @@ function search(authoraddr, tag) {
         clearBroadcasts("#searchresultlist");
 
         
-    //    startBlockNo = web3.eth.blockNumber - numLookBackBlocks;
-
         // Stop watchers from previous search
         stopWatchers();
 
-        // Search for ids of documents by authoraddr with tag identified by taghash
-        if (authoraddr !== "" && tag !== "") {
+        web3.eth.getBlockNumber(function(error, blocknr) {
+            
+            if (!error) {          
 
-            tagSearchEvent = documentaryInstance.TagEvent({author: authoraddr, taghash: taghash}, {fromBlock: startBlockNo, toBlock: 'latest'});
-            tagSearchEvent.watch(function(error, result) {
-                if (!error) {
+                startBlockNo = blocknr - getNumLookBackBlocks();
 
-                    var nextwrcnt = wrcnt++;
-                    if (nextwrcnt >= docidarraysize) nextwrcnt = 0;
+                // Search for ids of documents by authoraddr with tag identified by taghash
+                if (authoraddr !== "" && tag !== "") {
 
-                    // Add id to array of documents to be loaded
-                    if (nextwrcnt != rdcnt) {
-                        wrcnt = nextwrcnt;
-                        docidarray[wrcnt] = result.args.docid;
+                    tagSearchEvent = documentaryInstance.TagEvent({author: authoraddr, taghash: taghash}, {fromBlock: startBlockNo, toBlock: 'latest'});
+                    tagSearchEvent.watch(function(error, result) {
+                        if (!error) {
 
-                        // Trigger loading of documents
-                        getDocs();
-                    }
+                            var nextwrcnt = wrcnt++;
+                            if (nextwrcnt >= docidarraysize) nextwrcnt = 0;
 
-                    // Stop searching for documents if ring buffer for document ids is full
-                    else {
-                        tagSearchEvent.stopWatching();
-                    }
+                            // Add id to array of documents to be loaded
+                            if (nextwrcnt != rdcnt) {
+                                wrcnt = nextwrcnt;
+                                docidarray[wrcnt] = result.args.docid;
+
+                                // Trigger loading of documents
+                                getDocs();
+                            }
+
+                            // Stop searching for documents if ring buffer for document ids is full
+                            else {
+                                tagSearchEvent.stopWatching();
+                            }
+                        }
+                        else {
+                            showError(error);
+                        }
+                    });        
                 }
-                else {
-                    showError(error);
+                
+                // Search for latest publications
+                if (authoraddr === "" && tag === "") {
+
+                    docSearchEvent = documentaryInstance.DocumentEvent({}, {fromBlock: startBlockNo, toBlock: 'latest'});
+                    docSearchEvent.watch(function(error, result) {
+                        if (!error) {
+
+                            // Display only original documents, no comments. Display using summaries and comment links
+                            if (result.args.refid.toNumber() === 0) {
+                                printDocument(result, "#searchresultlist", true, true);
+                            }
+                        }
+                        else {
+                            showError(error);
+                        }
+                    });        
                 }
-            });        
-        }
-        
-        // Search for latest publications
-        if (authoraddr === "" && tag === "") {
 
-            docSearchEvent = documentaryInstance.DocumentEvent({}, {fromBlock: startBlockNo, toBlock: 'latest'});
-            docSearchEvent.watch(function(error, result) {
-                if (!error) {
+                // Search for documents written by authoraddr
+                else if (authoraddr !== "") {
 
-                    // Display only original documents, no comments. Display using summaries and comment links
-                    if (result.args.refid.toNumber() === 0) {
-                        printDocument(result, "#searchresultlist", true, true);
-                    }
+                    docSearchEvent = documentaryInstance.DocumentEvent({author: authoraddr}, {fromBlock: startBlockNo, toBlock: 'latest'});
+                    docSearchEvent.watch(function(error, result) {
+                        if (!error) {
+
+                            // Display only original documents, no comments. Display using summaries and comment links
+                            if (result.args.refid.toNumber() === 0) {
+                                printDocument(result, "#searchresultlist", true, true);
+                            }
+                        }
+                        else {
+                            showError(error);
+                        }
+                    });        
                 }
-                else {
-                    showError(error);
+                
+                // Search for ids of documents with tag identified by taghash
+                else if (tag !== "") {
+
+                    tagSearchEvent = documentaryInstance.TagEvent({taghash: taghash}, {fromBlock: startBlockNo, toBlock: 'latest'});
+                    tagSearchEvent.watch(function(error, result) {
+                        if (!error) {
+
+                            var nextwrcnt = wrcnt + 1;
+                            if (nextwrcnt >= docidarraysize) nextwrcnt = 0;
+
+                            // Add id to array of documents to be loaded
+                            if (nextwrcnt != rdcnt) {
+                                wrcnt = nextwrcnt;
+                                docidarray[wrcnt] = result.args.docid;
+
+                                // Trigger loading of documents
+                                getDocs();
+                            }
+
+                            // Stop searching for documents if ring buffer for document ids is full
+                            else {
+                                tagSearchEvent.stopWatching();
+                            }
+                        }
+                        else {
+                            showError(error);
+                        }
+                    });        
                 }
-            });        
-        }
-
-        // Search for documents written by authoraddr
-        else if (authoraddr !== "") {
-
-            docSearchEvent = documentaryInstance.DocumentEvent({author: authoraddr}, {fromBlock: startBlockNo, toBlock: 'latest'});
-            docSearchEvent.watch(function(error, result) {
-                if (!error) {
-
-                    // Display only original documents, no comments. Display using summaries and comment links
-                    if (result.args.refid.toNumber() === 0) {
-                        printDocument(result, "#searchresultlist", true, true);
-                    }
-                }
-                else {
-                    showError(error);
-                }
-            });        
-        }
-        
-        // Search for ids of documents with tag identified by taghash
-        else if (tag !== "") {
-
-            tagSearchEvent = documentaryInstance.TagEvent({taghash: taghash}, {fromBlock: startBlockNo, toBlock: 'latest'});
-            tagSearchEvent.watch(function(error, result) {
-                if (!error) {
-
-                    var nextwrcnt = wrcnt + 1;
-                    if (nextwrcnt >= docidarraysize) nextwrcnt = 0;
-
-                    // Add id to array of documents to be loaded
-                    if (nextwrcnt != rdcnt) {
-                        wrcnt = nextwrcnt;
-                        docidarray[wrcnt] = result.args.docid;
-
-                        // Trigger loading of documents
-                        getDocs();
-                    }
-
-                    // Stop searching for documents if ring buffer for document ids is full
-                    else {
-                        tagSearchEvent.stopWatching();
-                    }
-                }
-                else {
-                    showError(error);
-                }
-            });        
-        }
+            }
+            else {
+                showError(error);
+            }
+        });
     }
 };
 
@@ -267,7 +276,7 @@ function getDocs() {
     if (rdcnt >= docidarraysize) rdcnt = 0;
 
     // Retrieve document based on id
-    docSearchEvent = documentaryInstance.DocumentEvent({docid: docidarray[rdcnt]}, {fromBlock: startBlockNo, toBlock: 'latest'});
+    docSearchEvent = documentaryInstance.DocumentEvent({docid: docidarray[rdcnt]}, {fromBlock: deployBlockNr, toBlock: 'latest'});
     docSearchEvent.watch(function(error, result) {
         if (!error) {
 

@@ -4,11 +4,14 @@
 var contractAbi = [{"constant":true,"inputs":[{"name":"user","type":"address"},{"name":"docnum","type":"uint32"}],"name":"getUserDocId","outputs":[{"name":"","type":"uint128"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"docid","type":"uint128"}],"name":"makeVisible","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"refid","type":"uint128"},{"name":"doctime","type":"uint64"},{"name":"taghashes","type":"bytes32[]"},{"name":"tags","type":"string"},{"name":"title","type":"string"},{"name":"text","type":"string"}],"name":"documentIt","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"user","type":"address"}],"name":"getUserDocCount","outputs":[{"name":"","type":"uint32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"user","type":"address"}],"name":"grantEditorRights","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getDocCount","outputs":[{"name":"","type":"uint128"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"docid","type":"uint128"},{"name":"doctime","type":"uint64"},{"name":"taghashes","type":"bytes32[]"},{"name":"tags","type":"string"},{"name":"title","type":"string"},{"name":"text","type":"string"}],"name":"editIt","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"docid","type":"uint128"}],"name":"makeInvisible","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"editor","type":"address"}],"name":"revokeEditorRights","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"docid","type":"uint128"},{"indexed":true,"name":"refid","type":"uint128"},{"indexed":false,"name":"state","type":"uint16"},{"indexed":false,"name":"doctime","type":"uint256"},{"indexed":true,"name":"author","type":"address"},{"indexed":false,"name":"tags","type":"string"},{"indexed":false,"name":"title","type":"string"},{"indexed":false,"name":"text","type":"string"}],"name":"DocumentEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"docid","type":"uint128"},{"indexed":true,"name":"author","type":"address"},{"indexed":true,"name":"taghash","type":"bytes32"},{"indexed":true,"name":"channelid","type":"uint64"}],"name":"TagEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"docid","type":"uint128"},{"indexed":false,"name":"state","type":"uint16"}],"name":"InvisibleDocumentEvent","type":"event"}];
 var contractAddress_rinkeby = "0xaDdBEC01921ff2B46992F2a40fc322F7B08a86F9";         // Rinkeby
 var contractAddress_mainnet = "0xaDdBEC01921ff2B46992F2a40fc322F7B08a86F9";         // Main net
+var deployBlockNr_rinkeby = 2230231;
+var deployBlockNr_mainnet = 5560679;
 
 // Contract address, reference and instance according to selected network
 var contractAddress;
 var documentaryContract;
 var documentaryInstance;
+var deployBlockNr;
 
 // Ifd of the currently selected document
 var curdocid;
@@ -20,8 +23,8 @@ var docGetEevent;
 var commentSearchEvent;
 
 // Earliest block for event seatch
-//var numLookBackBlocks = 170000;
-var startBlockNo = 1000000; 
+var numLookBackBlocks = 30*24*60*4;
+var startBlockNo; 
 
 
 // For site initialization
@@ -217,3 +220,7 @@ function sendDocument(refid, title, tags, text) {
         });
     }
 };
+
+function getNumLookBackBlocks() {
+    return numLookBackBlocks;
+}
