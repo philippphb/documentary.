@@ -6,3 +6,7 @@ documentary consists of a smart contract that lives on the Ethereum blockchain a
  
 This repository contains the full source code of the documentary smart contract as well as the documentary frontend.
  
+ 
+ Hints on Running documentary Locally
+ ---
+ To run documemtary locally, just clone the complete repository and open file src/main/webapp/index.html in your web browser. Note that if you are using Metamask, you should not open the file directly from the file system, since this is not supported by Metamask for security reasons. Instead, you need to serve the file via a local webserver, such as XAMPP, for example.
